@@ -68,9 +68,10 @@ def init_db(refresh=True):
     drop_and_create_db()
 
     # Initialize db - create tables, indices, constraints
-    print(f'Setting up new {config.DB_NAME} db ...')
+    uri = config.SQLALCHEMY_DATABASE_URI
+    print(f'Setting up new {config.DB_NAME} db at {uri}...')
 
-    engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+    engine = create_engine(uri)
     with engine.connect() as conn:
         script_dir = os.path.join(ROOT_DIR, 'scripts', 'postgres')
         # Execute each sql script needed to setup db
