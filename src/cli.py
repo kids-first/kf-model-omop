@@ -14,6 +14,7 @@ def cli():
 @click.command()
 @click.option('--refresh_schema',
               default=False,
+              show_default=True,
               is_flag=True,
               help='A flag specifying whether to download and use the latest '
               'OMOP CommonDataModel postgres schema when creating the db')
