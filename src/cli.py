@@ -27,4 +27,17 @@ def init_db(refresh_schema):
     init_db(refresh_schema)
 
 
+@click.command()
+@click.option('-o', '--output_filepath',
+              type=click.Path(file_okay=True, dir_okay=False))
+def erd(output_filepath):
+    """
+    Generate an entity relationship diagram from the OMOP database
+    """
+    from db import erd
+
+    erd(output_filepath)
+
+
 cli.add_command(init_db)
+cli.add_command(erd)

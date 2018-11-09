@@ -5,8 +5,8 @@ from shutil import copyfile, rmtree
 from sqlalchemy import create_engine
 
 from config import DevelopmentConfig as config
+from config import ROOT_DIR
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INIT_DB_SCRIPTS = ['OMOP CDM postgresql ddl.txt',
                    'OMOP CDM postgresql pk indexes.txt',
                    'OMOP CDM postgresql constraints.txt']
@@ -118,6 +118,18 @@ def drop_and_create_db():
         conn.execute(f'drop database if exists {config.DB_NAME}')
         conn.execute('commit')
         conn.execute(f'create database {config.DB_NAME}')
+
+
+def erd(filepath=None):
+    doc_dir = os.path.join(os.path.dirname(ROOT_DIR), 'docs')
+    if not filepath:
+        filepath = os.path.join(doc_dir, 'erd.png')
+
+    # Draw from database
+    from eralchemy import render_er
+    render_er(config.SQLALCHEMY_DATABASE_URI, filepath)
+
+    print(f'Entity relationship diagram generated: {filepath}')
 
 
 def clear_db():

@@ -30,8 +30,13 @@ source ./venv/bin/activate
 ```
 
 ### Install
+Install min dependencies and CLI
 ```
 pip install -e .
+```
+Install docs dependencies (needed to generate ERD)
+```
+pip install -r doc-requirements.txt
 ```
 
 ### Run
