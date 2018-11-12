@@ -14,11 +14,11 @@ from sqlalchemy.schema import (
 
 from config import config as config_dict
 from config import ROOT_DIR, APP_CONFIG_ENV_VAR, CDM_REPO_URL
+from model.models import Base
 
 INIT_DB_SCRIPTS = ['OMOP CDM postgresql ddl.txt',
                    'OMOP CDM postgresql pk indexes.txt',
                    'OMOP CDM postgresql constraints.txt']
-
 SCRIPTS_DIR = os.path.join(os.path.dirname(ROOT_DIR), 'scripts')
 
 mode = os.getenv(APP_CONFIG_ENV_VAR) or 'development'
@@ -65,7 +65,7 @@ def refresh_pg_scripts():
     print('Refresh Complete!')
 
 
-def create_and_init_db(config=None, refresh=True):
+def create_omop(config=None, refresh=True, from_models=True):
     """
     Drop db, create new omop db, then create tables, indices, and constraints
 
@@ -86,22 +86,27 @@ def create_and_init_db(config=None, refresh=True):
 
     # Initialize db - create tables, indices, constraints
     uri = config.SQLALCHEMY_DATABASE_URI
+    engine = create_engine(uri)
+
     print(f'Setting up new OMOP db at {uri}...')
 
-    engine = create_engine(uri)
-    with engine.connect() as conn:
-        script_dir = os.path.join(SCRIPTS_DIR, 'postgres')
-        # Execute each sql script needed to setup db
-        for fname in INIT_DB_SCRIPTS:
-            filepath = os.path.join(script_dir, fname)
+    # Directly from postgres scripts
+    if from_models:
+        Base.metadata.create_all(engine)
+    else:
+        with engine.connect() as conn:
+            script_dir = os.path.join(SCRIPTS_DIR, 'postgres')
+            # Execute each sql script needed to setup db
+            for fname in INIT_DB_SCRIPTS:
+                filepath = os.path.join(script_dir, fname)
 
-            print(f'\tExecuting {filepath}')
+                print(f'\tExecuting {filepath}')
 
-            with open(filepath, 'r') as pg_script:
-                init_script = pg_script.read()
+                with open(filepath, 'r') as pg_script:
+                    init_script = pg_script.read()
 
-            conn.execute(init_script)
-            conn.execute('commit')
+                conn.execute(init_script)
+                conn.execute('commit')
 
 
 def drop_db(config):
@@ -185,7 +190,9 @@ def erd(config=None, filepath=None):
 
 def drop_tables(config=None):
     """
-    Drop all tables
+    Drop all tables despite existing constraints
+
+    Source https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/DropEverything #noqa E501
 
     :param config: A Config object encapsulating all db parameters such as
     user, pw, host, port, and name of the db. See config.py for more info.
@@ -230,3 +237,8 @@ def drop_tables(config=None):
         conn.execute(DropTable(table))
 
     trans.commit()
+
+
+# TODO - Add method to yield a context managed session
+# TODO - Add cli command to generate a templated import module
+# TODO - Implement a sample import module for demonstration, update README
