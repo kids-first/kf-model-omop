@@ -1,3 +1,10 @@
+"""
+Auto generated models from postgres db schema using sqlacodegen
+https://pypi.org/project/sqlacodegen/
+
+Extend all models with model.common.ModelMixins
+"""
+
 # coding: utf-8
 from sqlalchemy import (
     BigInteger,

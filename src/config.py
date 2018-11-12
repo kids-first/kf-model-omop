@@ -27,11 +27,12 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     DB_NAME = 'test'
-    SQLALCHEMY_DATABASE_URI = Config.DB_URI_TEMPLATE.format(user='postgres',
-                                                            pw='',
-                                                            host='localhost',
-                                                            port=5432,
-                                                            db=DB_NAME)
+    SQLALCHEMY_DATABASE_URI = Config.DB_URI_TEMPLATE.format(
+        user=Config.PG_USER,
+        pw=Config.PG_PASS,
+        host=Config.PG_HOST,
+        port=Config.PG_PORT,
+        db=DB_NAME)
 
 
 config = {

@@ -13,9 +13,11 @@ config = config_dict.get('testing')
 class ModelTestCase(unittest.TestCase):
 
     def setUp(self):
+        # Drop all tables in test db and create new tables
         self.engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
-        drop_tables(config=config, engine=self.engine)
+        drop_tables(config=config)
         Base.metadata.create_all(self.engine)
+        # Start a session
         self.session = sessionmaker(bind=self.engine)()
 
     def tearDown(self):

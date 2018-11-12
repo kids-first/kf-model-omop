@@ -3,6 +3,14 @@ import subprocess
 from shutil import copyfile, rmtree
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import reflection
+from sqlalchemy.schema import (
+    MetaData,
+    Table,
+    DropTable,
+    ForeignKeyConstraint,
+    DropConstraint,
+)
 
 from config import config as config_dict
 from config import ROOT_DIR, APP_CONFIG_ENV_VAR, CDM_REPO_URL
@@ -61,6 +69,8 @@ def create_and_init_db(config=None, refresh=True):
     """
     Drop db, create new omop db, then create tables, indices, and constraints
 
+    :param config: A Config object encapsulating all db parameters such as
+    user, pw, host, port, and name of the db. See config.py for more info.
     :param refresh: boolean specifying whether to refresh the init-db
     postgres scripts
     """
@@ -96,7 +106,10 @@ def create_and_init_db(config=None, refresh=True):
 
 def drop_db(config):
     """
-    Drop all active connections and drop DB
+    Drop all active connections and drop database
+
+    :param config: A Config object encapsulating all db parameters such as
+    user, pw, host, port, and name of the db. See config.py for more info.
     """
     # Read sql to drop active connections
     drop_conns_file = os.path.join(SCRIPTS_DIR, 'postgres', 'drop_conns.txt')
@@ -128,6 +141,9 @@ def drop_db(config):
 def create_db(config):
     """
     Create new database
+
+    :param config: A Config object encapsulating all db parameters such as
+    user, pw, host, port, and name of the db. See config.py for more info.
     """
     # Create db conn
     uri = config.DB_URI_TEMPLATE.format(user='postgres',
@@ -148,6 +164,10 @@ def create_db(config):
 def erd(config=None, filepath=None):
     """
     Generate an entity relationship diagram from the database
+
+    :param config: A Config object encapsulating all db parameters such as
+    user, pw, host, port, and name of the db. See config.py for more info.
+    :param filepath: Path to output ERD file
     """
     config = config or config_dict.get(mode)
 
@@ -163,22 +183,16 @@ def erd(config=None, filepath=None):
     print(f'Entity relationship diagram generated: {filepath}')
 
 
-def drop_tables(config=None, engine=None):
+def drop_tables(config=None):
     """
     Drop all tables
+
+    :param config: A Config object encapsulating all db parameters such as
+    user, pw, host, port, and name of the db. See config.py for more info.
     """
     config = config or config_dict.get(mode)
 
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.schema import (
-        MetaData,
-        Table,
-        DropTable,
-        ForeignKeyConstraint,
-        DropConstraint,
-    )
-
-    engine = engine or create_engine(config.SQLALCHEMY_DATABASE_URI)
+    engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 
     conn = engine.connect()
 
