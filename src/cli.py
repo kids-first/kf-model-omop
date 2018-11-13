@@ -24,7 +24,7 @@ def cli():
               default=True,
               show_default=True,
               is_flag=True,
-              help='A flag specifying whether create the OMOP tables from '
+              help='A flag specifying whether to create the OMOP tables from '
               'defined ORM models or from the OMOP Postgres scripts.')
 def create_omop(refresh_all, from_models):
     """
@@ -61,7 +61,7 @@ def erd(output_filepath):
     """
     from db import erd
 
-    erd(output_filepath)
+    erd(filepath=output_filepath)
 
 
 cli.add_command(create_omop)

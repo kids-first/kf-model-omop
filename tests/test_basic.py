@@ -1,16 +1,13 @@
 
-from model.models import *
-from common import ModelTestCase
+from model.models import Location
 
 
-class Test(ModelTestCase):
+def test_model(db_session):
+    # Basic model test to make sure things are working
+    loc = Location(city='Philadelphia')
 
-    def test_model(self):
-        # Basic model test to make sure things are working
-        loc = Location(city='Philadelphia')
+    db_session.add(loc)
+    db_session.commit()
 
-        self.session.add(loc)
-        self.session.commit()
-
-        assert self.session.query(Location).count() == 1
-        assert self.session.query(Location).first().kf_id
+    assert db_session.query(Location).count() == 1
+    assert db_session.query(Location).first().kf_id

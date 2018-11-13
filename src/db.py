@@ -13,15 +13,17 @@ from sqlalchemy.schema import (
 )
 
 from config import config as config_dict
-from config import ROOT_DIR, APP_CONFIG_ENV_VAR, CDM_REPO_URL
+from config import (
+    ROOT_DIR,
+    APP_CONFIG_ENV_VAR,
+    CDM_REPO_URL
+)
 from model.models import Base
 
 INIT_DB_SCRIPTS = ['OMOP CDM postgresql ddl.txt',
                    'OMOP CDM postgresql pk indexes.txt',
                    'OMOP CDM postgresql constraints.txt']
 SCRIPTS_DIR = os.path.join(os.path.dirname(ROOT_DIR), 'scripts')
-
-mode = os.getenv(APP_CONFIG_ENV_VAR) or 'development'
 
 
 def refresh_pg_scripts():
@@ -74,7 +76,7 @@ def create_omop(config=None, refresh=True, from_models=True):
     :param refresh: boolean specifying whether to refresh the init-db
     postgres scripts
     """
-    config = config or config_dict.get(mode)
+    config = config or select_config()
 
     # Download the latest OMOP CDM postgres schema
     if refresh:
@@ -174,7 +176,7 @@ def erd(config=None, filepath=None):
     user, pw, host, port, and name of the db. See config.py for more info.
     :param filepath: Path to output ERD file
     """
-    config = config or config_dict.get(mode)
+    config = config or select_config()
 
     doc_dir = os.path.join(os.path.dirname(ROOT_DIR), 'docs')
     if not filepath:
@@ -182,7 +184,7 @@ def erd(config=None, filepath=None):
 
     # Draw from database
     from eralchemy import render_er
-    print(config.SQLALCHEMY_DATABASE_URI)
+    print(f'Generating ERD for {config.DB_NAME} ...')
     render_er(config.SQLALCHEMY_DATABASE_URI, filepath)
 
     print(f'Entity relationship diagram generated: {filepath}')
@@ -192,12 +194,12 @@ def drop_tables(config=None):
     """
     Drop all tables despite existing constraints
 
-    Source https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/DropEverything #noqa E501
+    Source https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/DropEverything # noqa E501
 
     :param config: A Config object encapsulating all db parameters such as
     user, pw, host, port, and name of the db. See config.py for more info.
     """
-    config = config or config_dict.get(mode)
+    config = config or select_config()
 
     engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 
@@ -239,6 +241,11 @@ def drop_tables(config=None):
     trans.commit()
 
 
-# TODO - Add method to yield a context managed session
-# TODO - Add cli command to generate a templated import module
-# TODO - Implement a sample import module for demonstration, update README
+def select_config():
+    """
+    Get the operating mode from the environment var, then use that to
+    select the Config class. If the environment var is not defined, default
+    to the 'development' mode.
+    """
+    return config_dict.get(os.getenv(APP_CONFIG_ENV_VAR) or
+                           'development')
