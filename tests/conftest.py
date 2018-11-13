@@ -1,5 +1,4 @@
 import pytest
-import unittest
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -14,12 +13,15 @@ config = config_dict.get('testing')
 @pytest.fixture(scope='session')
 def db_session():
     # Drop all tables in test db and create new tables
+    drop_tables(config_name='testing')
+
     engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
-    drop_tables(config=config)
     Base.metadata.create_all(engine)
 
     # Start a session
-    session = sessionmaker(bind=engine)()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
     yield session
 
     # Teardown
