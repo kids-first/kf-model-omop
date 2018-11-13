@@ -1,11 +1,12 @@
 import os
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+CDM_REPO_URL = 'git@github.com:kids-first/CommonDataModel.git'
+APP_CONFIG_ENV_VAR = 'OMOP_CONFIG'
 
 
 class Config:
     DB_NAME = 'omop'
-    CDM_REPO_URL = 'git@github.com:kids-first/CommonDataModel.git'
     PG_HOST = os.environ.get('PG_HOST', 'localhost')
     PG_PORT = os.environ.get('PG_PORT', 5432)
     PG_NAME = os.environ.get('PG_NAME', DB_NAME)
@@ -21,10 +22,21 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_ECHO = True
+    pass
+
+
+class TestingConfig(Config):
+    DB_NAME = 'test'
+    SQLALCHEMY_DATABASE_URI = Config.DB_URI_TEMPLATE.format(
+        user=Config.PG_USER,
+        pw=Config.PG_PASS,
+        host=Config.PG_HOST,
+        port=Config.PG_PORT,
+        db=DB_NAME)
 
 
 config = {
     "development": DevelopmentConfig,
+    "testing": TestingConfig,
     "default": DevelopmentConfig
 }

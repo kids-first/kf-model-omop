@@ -11,21 +11,45 @@ def cli():
     pass
 
 
-@click.command()
-@click.option('--refresh_schema',
+@click.command(name='create-omop')
+@click.option('--refresh_all',
               default=False,
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to download and use the latest '
-              'OMOP CommonDataModel postgres schema when creating the db')
-def init_db(refresh_schema):
+              'OMOP CommonDataModel postgres schema when creating the db.'
+              'This option will only take effect if the flag --from_models '
+              'is present')
+@click.option('--from_models',
+              default=True,
+              show_default=True,
+              is_flag=True,
+              help='A flag specifying whether to create the OMOP tables from '
+              'defined ORM models or from the OMOP Postgres scripts.')
+def create_omop(refresh_all, from_models):
     """
-    Drop current OMOP db, create new OMOP db, then create tables, indices,
+    Drop current db, create new db, then create OMOP tables, indices,
     and constraints
-    """
-    from db import init_db
 
-    init_db(refresh_schema)
+    All db parameters such as user, pw, host, port, and name of the db are
+    controlled through environment variables. See config.py for more info.
+    """
+    from db import create_omop
+
+    create_omop(from_models=from_models, refresh=refresh_all)
+
+
+@click.command(name='drop-db')
+def drop_db():
+    """
+    Drop db regardless of the active connections
+
+    All db parameters such as user, pw, host, port, and name of the db are
+    controlled through environment variables. See config.py for more info.
+    """
+    from db import drop_db
+
+    drop_db()
 
 
 @click.command()
@@ -37,8 +61,9 @@ def erd(output_filepath):
     """
     from db import erd
 
-    erd(output_filepath)
+    erd(filepath=output_filepath)
 
 
-cli.add_command(init_db)
+cli.add_command(create_omop)
+cli.add_command(drop_db)
 cli.add_command(erd)
