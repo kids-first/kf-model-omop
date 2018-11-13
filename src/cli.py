@@ -1,3 +1,4 @@
+from pprint import pprint
 import os
 import sys
 from shutil import copyfile
@@ -65,6 +66,9 @@ def drop_db():
 def erd(output_filepath):
     """
     Generate an entity relationship diagram from the OMOP database
+
+    All db parameters such as user, pw, host, port, and name of the db are
+    controlled through environment variables. See config.py for more info.
     """
     from db import erd
 
@@ -98,7 +102,21 @@ def generate_code_template(output_dir):
               f'OMOP SQLAlchemy models. \nLocated at {dest_path}')
 
 
+@click.command('list-tables')
+def list_tables():
+    """
+    List tables in the database. Convenience method for sanity checks.
+
+    All db parameters such as user, pw, host, port, and name of the db are
+    controlled through environment variables. See config.py for more info.
+    """
+    from db import list_tables
+
+    pprint(list_tables())
+
+
 cli.add_command(create_omop)
 cli.add_command(drop_db)
 cli.add_command(erd)
 cli.add_command(generate_code_template)
+cli.add_command(list_tables)

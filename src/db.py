@@ -249,6 +249,26 @@ def drop_tables(config_name=None):
     trans.commit()
 
 
+def list_tables(config_name=None):
+    """
+    A convenience method to list tables in the database
+
+    :param config_name: a dict key which specifies which Config class to select
+    in config.config dict. The Config class encapsulates all db parameters such
+    as user, pw, host, port, and name of the db. See config.py for more info.
+    """
+    from db import _select_config
+    from sqlalchemy import create_engine, inspect
+
+    config = _select_config(config_name=None)
+    engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
+
+    inspector = inspect(engine)
+    print(f'Listing tables for {config.PG_HOST}/{config.PG_NAME}')
+
+    return inspector.get_table_names()
+
+
 def _select_config(config_name):
     """
     Get the operating mode from the environment var, then use that to

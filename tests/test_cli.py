@@ -56,3 +56,14 @@ def test_code_template(tmpdir):
     # Check file
     with open(expected_file, 'r') as f:
         assert 'hello world!' in f.read()
+
+
+def test_list_tables():
+    """
+    Test list tables
+    """
+    runner = CliRunner()
+    result = runner.invoke(cli.list_tables, [], env=env)
+
+    assert 'concept' in result.stdout
+    assert result.exit_code == 0
