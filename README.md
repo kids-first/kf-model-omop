@@ -1,5 +1,6 @@
 # Kids First OMOP CommonDataModel
-Experimentation with the OMOP CommonDataModel.
+Experimentation with the OMOP CommonDataModel
+https://github.com/OHDSI/CommonDataModel/wiki
 
 ## Getting Started - Users
 
