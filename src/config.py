@@ -6,10 +6,9 @@ APP_CONFIG_ENV_VAR = 'OMOP_CONFIG'
 
 
 class Config:
-    DB_NAME = 'omop'
     PG_HOST = os.environ.get('PG_HOST', 'localhost')
     PG_PORT = os.environ.get('PG_PORT', 5432)
-    PG_NAME = os.environ.get('PG_NAME', DB_NAME)
+    PG_NAME = os.environ.get('PG_NAME', 'omop')
     PG_USER = os.environ.get('PG_USER', 'postgres')
     PG_PASS = os.environ.get('PG_PASS', '')
     SQLALCHEMY_ECHO = False
@@ -26,13 +25,13 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
-    DB_NAME = 'test'
+    PG_NAME = 'test'
     SQLALCHEMY_DATABASE_URI = Config.DB_URI_TEMPLATE.format(
         user=Config.PG_USER,
         pw=Config.PG_PASS,
         host=Config.PG_HOST,
         port=Config.PG_PORT,
-        db=DB_NAME)
+        db=PG_NAME)
 
 
 config = {

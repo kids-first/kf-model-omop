@@ -126,7 +126,7 @@ def drop_db(config_name):
     with open(drop_conns_file) as f:
         drop_conns_sql_str = f.read()
         drop_conns_sql_str = drop_conns_sql_str.format(
-            DB_NAME=config.DB_NAME)
+            DB_NAME=config.PG_NAME)
 
     # Create db conn
     uri = config.DB_URI_TEMPLATE.format(user=config.PG_USER,
@@ -139,12 +139,12 @@ def drop_db(config_name):
         conn.execute('commit')
 
         # Drop connections
-        print(f'Dropping all connections to {config.DB_NAME} db ...')
+        print(f'Dropping all connections to {config.PG_NAME} db ...')
         conn.execute(drop_conns_sql_str)
 
         # Drop database
-        print(f'Dropping db {config.DB_NAME} ...')
-        conn.execute(f'drop database if exists {config.DB_NAME}')
+        print(f'Dropping db {config.PG_NAME} ...')
+        conn.execute(f'drop database if exists "{config.PG_NAME}"')
         conn.execute('commit')
 
 
@@ -165,13 +165,13 @@ def create_db(config_name):
                                         port=config.PG_PORT,
                                         db='postgres')
 
-    print(f'Creating new db {config.DB_NAME}...')
+    print(f'Creating new db {config.PG_NAME}...')
 
     engine = create_engine(uri)
     with engine.connect() as conn:
         # Create new db
         conn.execute('commit')
-        conn.execute(f'create database {config.DB_NAME}')
+        conn.execute(f'create database "{config.PG_NAME}"')
 
 
 def erd(config_name=None, filepath=None):

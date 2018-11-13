@@ -41,7 +41,7 @@ def scoped_session(config_name='development',
                                         pw=pw or config.PG_PASS,
                                         host=host or config.PG_HOST,
                                         port=port or config.PG_PORT,
-                                        db=db_name or config.DB_NAME)
+                                        db=db_name or config.PG_NAME)
     engine = create_engine(uri)
 
     # Start a session
