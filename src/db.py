@@ -67,7 +67,7 @@ def refresh_pg_scripts():
     print('Refresh Complete!')
 
 
-def create_omop(config=None, refresh=True, from_models=True):
+def create_omop(config_name=None, refresh=True, from_models=True):
     """
     Drop db, create new omop db, then create tables, indices, and constraints
 
@@ -76,17 +76,16 @@ def create_omop(config=None, refresh=True, from_models=True):
     :param refresh: boolean specifying whether to refresh the init-db
     postgres scripts
     """
-    config = config or select_config()
-
     # Download the latest OMOP CDM postgres schema
     if refresh:
         refresh_pg_scripts()
 
     # Drop db and create new one
-    drop_db(config)
-    create_db(config)
+    drop_db(config_name)
+    create_db(config_name)
 
     # Initialize db - create tables, indices, constraints
+    config = _select_config(config_name)
     uri = config.SQLALCHEMY_DATABASE_URI
     engine = create_engine(uri)
 
@@ -111,13 +110,15 @@ def create_omop(config=None, refresh=True, from_models=True):
                 conn.execute('commit')
 
 
-def drop_db(config):
+def drop_db(config_name):
     """
     Drop all active connections and drop database
 
     :param config: A Config object encapsulating all db parameters such as
     user, pw, host, port, and name of the db. See config.py for more info.
     """
+    config = _select_config(config_name)
+
     # Read sql to drop active connections
     drop_conns_file = os.path.join(SCRIPTS_DIR, 'postgres', 'drop_conns.txt')
     with open(drop_conns_file) as f:
@@ -145,13 +146,15 @@ def drop_db(config):
         conn.execute('commit')
 
 
-def create_db(config):
+def create_db(config_name):
     """
     Create new database
 
     :param config: A Config object encapsulating all db parameters such as
     user, pw, host, port, and name of the db. See config.py for more info.
     """
+    config = _select_config(config_name)
+
     # Create db conn
     uri = config.DB_URI_TEMPLATE.format(user='postgres',
                                         pw='',
@@ -168,7 +171,7 @@ def create_db(config):
         conn.execute(f'create database {config.DB_NAME}')
 
 
-def erd(config=None, filepath=None):
+def erd(config_name=None, filepath=None):
     """
     Generate an entity relationship diagram from the database
 
@@ -176,7 +179,7 @@ def erd(config=None, filepath=None):
     user, pw, host, port, and name of the db. See config.py for more info.
     :param filepath: Path to output ERD file
     """
-    config = config or select_config()
+    config = _select_config(config_name)
 
     doc_dir = os.path.join(os.path.dirname(ROOT_DIR), 'docs')
     if not filepath:
@@ -190,7 +193,7 @@ def erd(config=None, filepath=None):
     print(f'Entity relationship diagram generated: {filepath}')
 
 
-def drop_tables(config=None):
+def drop_tables(config_name=None):
     """
     Drop all tables despite existing constraints
 
@@ -199,7 +202,7 @@ def drop_tables(config=None):
     :param config: A Config object encapsulating all db parameters such as
     user, pw, host, port, and name of the db. See config.py for more info.
     """
-    config = config or select_config()
+    config = _select_config(config_name)
 
     engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 
@@ -241,11 +244,14 @@ def drop_tables(config=None):
     trans.commit()
 
 
-def select_config():
+def _select_config(config_name):
     """
     Get the operating mode from the environment var, then use that to
     select the Config class. If the environment var is not defined, default
     to the 'development' mode.
     """
-    return config_dict.get(os.getenv(APP_CONFIG_ENV_VAR) or
-                           'development')
+    if config_name:
+        return config_dict.get(config_name)
+    else:
+        return config_dict.get(os.getenv(APP_CONFIG_ENV_VAR) or
+                               'development')
