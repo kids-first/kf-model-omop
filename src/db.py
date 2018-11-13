@@ -71,8 +71,9 @@ def create_omop(config_name=None, refresh=True, from_models=True):
     """
     Drop db, create new omop db, then create tables, indices, and constraints
 
-    :param config: A Config object encapsulating all db parameters such as
-    user, pw, host, port, and name of the db. See config.py for more info.
+    :param config_name: a dict key which specifies which Config class to select
+    in config.config dict. The Config class encapsulates all db parameters such
+    as user, pw, host, port, and name of the db. See config.py for more info.
     :param refresh: boolean specifying whether to refresh the init-db
     postgres scripts
     """
@@ -89,7 +90,7 @@ def create_omop(config_name=None, refresh=True, from_models=True):
     uri = config.SQLALCHEMY_DATABASE_URI
     engine = create_engine(uri)
 
-    print(f'Setting up new OMOP db at {uri}...')
+    print(f'Setting up new OMOP db at {config.PG_HOST}/{config.PG_NAME}...')
 
     # Directly from postgres scripts
     if from_models:
@@ -114,8 +115,9 @@ def drop_db(config_name):
     """
     Drop all active connections and drop database
 
-    :param config: A Config object encapsulating all db parameters such as
-    user, pw, host, port, and name of the db. See config.py for more info.
+    :param config_name: a dict key which specifies which Config class to select
+    in config.config dict. The Config class encapsulates all db parameters such
+    as user, pw, host, port, and name of the db. See config.py for more info.
     """
     config = _select_config(config_name)
 
@@ -127,8 +129,8 @@ def drop_db(config_name):
             DB_NAME=config.DB_NAME)
 
     # Create db conn
-    uri = config.DB_URI_TEMPLATE.format(user='postgres',
-                                        pw='',
+    uri = config.DB_URI_TEMPLATE.format(user=config.PG_USER,
+                                        pw=config.PG_PASS,
                                         host=config.PG_HOST,
                                         port=config.PG_PORT,
                                         db='postgres')
@@ -150,14 +152,15 @@ def create_db(config_name):
     """
     Create new database
 
-    :param config: A Config object encapsulating all db parameters such as
-    user, pw, host, port, and name of the db. See config.py for more info.
+    :param config_name: a dict key which specifies which Config class to select
+    in config.config dict. The Config class encapsulates all db parameters such
+    as user, pw, host, port, and name of the db. See config.py for more info.
     """
     config = _select_config(config_name)
 
     # Create db conn
-    uri = config.DB_URI_TEMPLATE.format(user='postgres',
-                                        pw='',
+    uri = config.DB_URI_TEMPLATE.format(user=config.PG_USER,
+                                        pw=config.PG_PASS,
                                         host=config.PG_HOST,
                                         port=config.PG_PORT,
                                         db='postgres')
@@ -175,8 +178,9 @@ def erd(config_name=None, filepath=None):
     """
     Generate an entity relationship diagram from the database
 
-    :param config: A Config object encapsulating all db parameters such as
-    user, pw, host, port, and name of the db. See config.py for more info.
+    :param config_name: a dict key which specifies which Config class to select
+    in config.config dict. The Config class encapsulates all db parameters such
+    as user, pw, host, port, and name of the db. See config.py for more info.
     :param filepath: Path to output ERD file
     """
     config = _select_config(config_name)
@@ -187,7 +191,7 @@ def erd(config_name=None, filepath=None):
 
     # Draw from database
     from eralchemy import render_er
-    print(f'Generating ERD for {config.DB_NAME} ...')
+    print(f'Generating ERD for {config.PG_HOST}/{config.PG_NAME} ...')
     render_er(config.SQLALCHEMY_DATABASE_URI, filepath)
 
     print(f'Entity relationship diagram generated: {filepath}')
@@ -199,8 +203,9 @@ def drop_tables(config_name=None):
 
     Source https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/DropEverything # noqa E501
 
-    :param config: A Config object encapsulating all db parameters such as
-    user, pw, host, port, and name of the db. See config.py for more info.
+    :param config_name: a dict key which specifies which Config class to select
+    in config.config dict. The Config class encapsulates all db parameters such
+    as user, pw, host, port, and name of the db. See config.py for more info.
     """
     config = _select_config(config_name)
 
@@ -251,7 +256,7 @@ def _select_config(config_name):
     to the 'development' mode.
     """
     if config_name:
-        return config_dict.get(config_name)
+        return config_dict.get(config_name, 'default')
     else:
         return config_dict.get(os.getenv(APP_CONFIG_ENV_VAR) or
                                'development')
