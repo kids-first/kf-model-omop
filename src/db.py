@@ -111,7 +111,7 @@ def create_omop(config_name=None, refresh=True, from_models=True):
                 conn.execute('commit')
 
 
-def drop_db(config_name):
+def drop_db(config_name=None):
     """
     Drop all active connections and drop database
 
@@ -148,7 +148,7 @@ def drop_db(config_name):
         conn.execute('commit')
 
 
-def create_db(config_name):
+def create_db(config_name=None):
     """
     Create new database
 
