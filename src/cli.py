@@ -115,8 +115,24 @@ def list_tables():
     pprint(list_tables())
 
 
+@click.command('autogen-models')
+@click.option('--refresh_all',
+              default=False,
+              show_default=True,
+              is_flag=True,
+              help='A flag specifying whether to download and use the latest '
+              'OMOP CommonDataModel postgres schema when creating the db.')
+def auto_gen_models(refresh_all):
+    """
+    Autogenerate the OMOP SQLAlchemy models
+    """
+    from factory import utils
+    utils.auto_gen_models(refresh_all)
+
+
 cli.add_command(create_omop)
 cli.add_command(drop_db)
 cli.add_command(erd)
 cli.add_command(generate_code_template)
 cli.add_command(list_tables)
+cli.add_command(auto_gen_models)
