@@ -1,6 +1,4 @@
 import os
-import subprocess
-from shutil import copyfile, rmtree
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import reflection
@@ -16,105 +14,14 @@ from config import config as config_dict
 from config import (
     ROOT_DIR,
     APP_CONFIG_ENV_VAR,
-    CDM_REPO_URL
 )
-from model.models import Base
 
-INIT_DB_SCRIPTS = ['OMOP CDM postgresql ddl.txt',
-                   'OMOP CDM postgresql pk indexes.txt',
-                   'OMOP CDM postgresql constraints.txt']
 SCRIPTS_DIR = os.path.join(os.path.dirname(ROOT_DIR), 'scripts')
-
-
-def refresh_pg_scripts(url=CDM_REPO_URL):
-    """
-    Delete current OMOP CDM postgres scripts and download latest
-    from OHSDI CommonDataModel git repository
-    """
-    print('Preparing to refresh OMOP CommonDataModel postgres schema ...')
-
-    model_dir = os.path.join(SCRIPTS_DIR, 'model')
-
-    # Delete repo if exists
-    if os.path.isdir(model_dir):
-        rmtree(model_dir)
-
-    # Clone fresh repo
-    cmd = (f'git clone {url} {model_dir}')
-    output = subprocess.run(cmd, shell=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
-    output_str = output.stdout.decode('utf-8')
-
-    print(output_str)
-
-    if output.returncode != 0:
-        raise Exception(
-            f'Error in refresh postgres scripts!\n\n{output_str}')
-
-    # Copy pg scripts to scripts/postgres
-    source_dir = os.path.join(model_dir, 'PostgreSQL')
-    dest_dir = os.path.join(SCRIPTS_DIR, 'postgres')
-
-    for pg_script in INIT_DB_SCRIPTS:
-        source_file = os.path.join(source_dir, pg_script)
-        dest_file = os.path.join(dest_dir, pg_script)
-        copyfile(source_file, dest_file)
-
-    # Delete model dir
-    rmtree(model_dir)
-
-    print('Refresh Complete!')
-
-
-def create_omop(config_name=None, refresh=True, from_models=True):
-    """
-    Drop db, create new omop db, then create tables, indices, and constraints
-
-    :param config_name: a dict key which specifies which Config class to select
-    in config.config dict. The Config class encapsulates all db parameters such
-    as user, pw, host, port, and name of the db. See config.py for more info.
-    :param refresh: boolean specifying whether to refresh the init-db
-    postgres scripts
-    """
-    # Download the latest OMOP CDM postgres schema
-    if refresh:
-        refresh_pg_scripts()
-
-    # Drop db and create new one
-    drop_db(config_name)
-    create_db(config_name)
-
-    # Initialize db - create tables, indices, constraints
-    config = _select_config(config_name)
-    uri = config.SQLALCHEMY_DATABASE_URI
-    engine = create_engine(uri)
-
-    print(f'Setting up new OMOP db at {config.PG_HOST}/{config.PG_NAME}...')
-
-    # Directly from postgres scripts
-    if from_models:
-        Base.metadata.create_all(engine)
-    else:
-        with engine.connect() as conn:
-            script_dir = os.path.join(SCRIPTS_DIR, 'postgres')
-            # Execute each sql script needed to setup db
-            for fname in INIT_DB_SCRIPTS:
-                filepath = os.path.join(script_dir, fname)
-
-                print(f'\tExecuting {filepath}')
-
-                with open(filepath, 'r') as pg_script:
-                    init_script = pg_script.read()
-
-                conn.execute(init_script)
-                conn.execute('commit')
 
 
 def drop_db(config_name=None):
     """
     Drop all active connections and drop database
-
     :param config_name: a dict key which specifies which Config class to select
     in config.config dict. The Config class encapsulates all db parameters such
     as user, pw, host, port, and name of the db. See config.py for more info.
@@ -257,7 +164,7 @@ def list_tables(config_name=None):
     in config.config dict. The Config class encapsulates all db parameters such
     as user, pw, host, port, and name of the db. See config.py for more info.
     """
-    from db import _select_config
+    from utils.db import _select_config
     from sqlalchemy import create_engine, inspect
 
     config = _select_config(config_name=None)

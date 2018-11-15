@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from config import config as config_dict
 from model.models import Base
-from db import drop_tables
+from utils.db import drop_tables
 
 config = config_dict.get('testing')
 

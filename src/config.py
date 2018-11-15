@@ -3,6 +3,9 @@ import os
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 MODELS_FILE_PATH = os.path.join(os.path.join(ROOT_DIR, 'model'), 'models.py')
 CDM_REPO_URL = 'git@github.com:kids-first/CommonDataModel.git'
+CDM_STANDARD_VOCAB_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(ROOT_DIR)),
+    'data', 'omop', 'standard_vocab')
 APP_CONFIG_ENV_VAR = 'OMOP_CONFIG'
 
 

@@ -22,26 +22,48 @@ def cli():
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to download and use the latest '
-              'OMOP CommonDataModel postgres schema when creating the db.'
-              'This option will only take effect if the flag --from_models '
-              'is present')
-@click.option('--from_models',
-              default=True,
+              'OMOP CommonDataModel postgres schema when creating the db.')
+@click.option('--from_schema',
+              default=False,
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to create the OMOP tables from '
               'defined ORM models or from the OMOP Postgres scripts.')
-def create_omop(refresh_all, from_models):
+@click.option('--with_constraints',
+              default=False,
+              show_default=True,
+              is_flag=True,
+              help='A flag specifying whether to apply constraints to OMOP db '
+              'after creating the db')
+@click.option('--with_index',
+              default=False,
+              show_default=True,
+              is_flag=True,
+              help='A flag specifying whether to add indices in OMOP db '
+              'after creating the db')
+@click.option('--with_standard_vocab',
+              default=False,
+              show_default=True,
+              is_flag=True,
+              help='A flag specifying whether to populate the database '
+              'with the OMOP standard vocabulary after its been created')
+def create_omop(refresh_all, from_schema, with_constraints,
+                with_index, with_standard_vocab):
     """
-    Drop current db, create new db, then create OMOP tables, indices,
-    and constraints
+    Drop current db, create a new db with the OMOP tablesself.
+    Optionally apply constraints, create indices or load the db with
+    OMOP standard vocabulary.
 
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from db import create_omop
+    from omop import create_omop
 
-    create_omop(from_models=from_models, refresh=refresh_all)
+    create_omop(refresh=refresh_all,
+                from_schema=from_schema,
+                with_constraints=with_constraints,
+                with_index=with_index,
+                with_standard_vocab=with_standard_vocab)
 
 
 @click.command(name='drop-db')
@@ -52,7 +74,7 @@ def drop_db():
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from db import drop_db
+    from utils.db import drop_db
 
     drop_db()
 
@@ -70,7 +92,7 @@ def erd(output_filepath):
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from db import erd
+    from utils.db import erd
 
     erd(filepath=output_filepath)
 
@@ -110,7 +132,7 @@ def list_tables():
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from db import list_tables
+    from utils.db import list_tables
 
     pprint(list_tables())
 
@@ -130,9 +152,40 @@ def auto_gen_models(refresh_all):
     utils.auto_gen_models(refresh_all)
 
 
+@click.command('load-standard-vocab')
+def load_standard_vocab():
+    """
+    Load the standard vocabulary into OMOP db
+    """
+    from omop import load_standard_vocab
+    load_standard_vocab()
+
+
+@click.command('apply-constraints')
+def create_constraints():
+    """
+    Apply the constraints to the OMOP database. Constraints require that the
+    index has been created.
+    """
+    from omop import create_constraints
+    create_constraints()
+
+
+@click.command('create-index')
+def create_index():
+    """
+    Create indices in OMOP database
+    """
+    from omop import create_index
+    create_index()
+
+
 cli.add_command(create_omop)
 cli.add_command(drop_db)
 cli.add_command(erd)
 cli.add_command(generate_code_template)
 cli.add_command(list_tables)
 cli.add_command(auto_gen_models)
+cli.add_command(load_standard_vocab)
+cli.add_command(create_constraints)
+cli.add_command(create_index)

@@ -1,7 +1,8 @@
 import os
 import subprocess
 
-from db import create_omop, drop_db
+from omop import create_omop
+from utils.db import drop_db
 from config import config as config_dict
 from config import MODELS_FILE_PATH, ROOT_DIR
 
@@ -18,7 +19,7 @@ def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
     """
     print('\nAuto-generating models ...\n')
     # Create temp db with omop tables
-    create_omop(config_name='temp', refresh=refresh_schema, from_models=False)
+    create_omop(config_name='temp', refresh=refresh_schema, from_schema=True)
 
     # Auto generate models from temp db
     generate_models_from_db(model_filepath)
