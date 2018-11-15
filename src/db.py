@@ -26,7 +26,7 @@ INIT_DB_SCRIPTS = ['OMOP CDM postgresql ddl.txt',
 SCRIPTS_DIR = os.path.join(os.path.dirname(ROOT_DIR), 'scripts')
 
 
-def refresh_pg_scripts():
+def refresh_pg_scripts(url=CDM_REPO_URL):
     """
     Delete current OMOP CDM postgres scripts and download latest
     from OHSDI CommonDataModel git repository
@@ -40,7 +40,7 @@ def refresh_pg_scripts():
         rmtree(model_dir)
 
     # Clone fresh repo
-    cmd = (f'git clone {CDM_REPO_URL} {model_dir}')
+    cmd = (f'git clone {url} {model_dir}')
     output = subprocess.run(cmd, shell=True,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)

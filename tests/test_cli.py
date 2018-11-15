@@ -67,3 +67,24 @@ def test_list_tables():
 
     assert 'concept' in result.stdout
     assert result.exit_code == 0
+
+
+def test_auto_gen_models(tmpdir_factory):
+    """
+    Test cli command code-template
+    """
+    # Create temp file
+    fn = tmpdir_factory.mktemp("data").join('models.py')
+    expected_file = str(fn)
+
+    # Autogen models
+    from factory.utils import auto_gen_models
+    auto_gen_models(refresh_schema=True, model_filepath=expected_file)
+
+    assert os.path.isfile(expected_file)
+
+    # Check content
+    with open(expected_file, 'r') as f:
+        content = f.read()
+        assert 'ModelMixins' in content
+        assert 'Base.metadata' in content

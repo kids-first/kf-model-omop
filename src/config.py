@@ -1,6 +1,7 @@
 import os
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+MODELS_FILE_PATH = os.path.join(os.path.join(ROOT_DIR, 'model'), 'models.py')
 CDM_REPO_URL = 'git@github.com:kids-first/CommonDataModel.git'
 APP_CONFIG_ENV_VAR = 'OMOP_CONFIG'
 
@@ -34,8 +35,19 @@ class TestingConfig(Config):
         db=PG_NAME)
 
 
+class TempConfig(Config):
+    PG_NAME = 'temp'
+    SQLALCHEMY_DATABASE_URI = Config.DB_URI_TEMPLATE.format(
+        user=Config.PG_USER,
+        pw=Config.PG_PASS,
+        host=Config.PG_HOST,
+        port=Config.PG_PORT,
+        db=PG_NAME)
+
+
 config = {
     "development": DevelopmentConfig,
     "testing": TestingConfig,
+    "temp": TempConfig,
     "default": DevelopmentConfig
 }
