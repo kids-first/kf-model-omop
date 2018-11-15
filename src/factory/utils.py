@@ -1,9 +1,7 @@
 import os
 import subprocess
 
-from omop import create_omop
-from utils.db import drop_db
-from config import config as config_dict
+from utils.db import _select_config
 from config import MODELS_FILE_PATH, ROOT_DIR
 
 
@@ -11,21 +9,13 @@ def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
     """
     Autogenerate the OMOP SQLAlchemy models
 
-    Create a temp db, download latest OMOP boostrap postgres scripts, run
-    postgres scripts to create OMOP tables, constraints, etc.
-
-    Use sqlacodegen to generate models from temp db. Then apply customizations
+    Use sqlacodegen to generate models from the db. Then apply customizations
     to the models (i.e. add Kids First IDs, etc)
     """
     print('\nAuto-generating models ...\n')
-    # Create temp db with omop tables
-    create_omop(config_name='temp', refresh=refresh_schema, from_schema=True)
 
     # Auto generate models from temp db
     generate_models_from_db(model_filepath)
-
-    # Drop temp db
-    drop_db(config_name='temp')
 
     # Inject customizations into the models Python module
     customize_models(model_filepath)
@@ -33,11 +23,11 @@ def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
     print(f'\nComplete - generated models: {model_filepath}')
 
 
-def generate_models_from_db(model_filepath, config_name='temp'):
+def generate_models_from_db(model_filepath):
     """
     Use sqlacodegen to generate SQLAlchemy models Python module from Postgres
     """
-    config = config_dict.get(config_name)
+    config = _select_config(config_name=None)
 
     cmd = (f'sqlacodegen {config.SQLALCHEMY_DATABASE_URI} '
            f'--outfile {model_filepath}')
