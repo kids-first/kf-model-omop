@@ -157,7 +157,7 @@ def auto_gen_models(refresh_all):
     Autogenerate the OMOP SQLAlchemy models
     """
     from factory import utils
-    utils.auto_gen_models(refresh_all)
+    utils.auto_gen_models(refresh_schema=refresh_all)
 
 
 @click.command('load-standard-vocab')

@@ -5,7 +5,8 @@ from utils.db import _select_config
 from config import MODELS_FILE_PATH, ROOT_DIR
 
 
-def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
+def auto_gen_models(config_name=None, refresh_schema=False,
+                    model_filepath=MODELS_FILE_PATH):
     """
     Autogenerate the OMOP SQLAlchemy models
 
@@ -15,7 +16,7 @@ def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
     print('\nAuto-generating models ...\n')
 
     # Auto generate models from temp db
-    generate_models_from_db(model_filepath)
+    generate_models_from_db(model_filepath, config_name)
 
     # Inject customizations into the models Python module
     customize_models(model_filepath)
@@ -23,11 +24,12 @@ def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
     print(f'\nComplete - generated models: {model_filepath}')
 
 
-def generate_models_from_db(model_filepath):
+def generate_models_from_db(model_filepath, config_name=None):
     """
     Use sqlacodegen to generate SQLAlchemy models Python module from Postgres
     """
-    config = _select_config(config_name=None)
+
+    config = _select_config(config_name=config_name)
 
     cmd = (f'sqlacodegen {config.SQLALCHEMY_DATABASE_URI} '
            f'--outfile {model_filepath}')
