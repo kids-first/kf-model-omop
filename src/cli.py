@@ -5,6 +5,8 @@ from shutil import copyfile
 
 import click
 
+from utils.misc import time_it
+
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
@@ -47,6 +49,7 @@ def cli():
               is_flag=True,
               help='A flag specifying whether to populate the database '
               'with the OMOP standard vocabulary after its been created')
+@time_it
 def create_omop(refresh_all, from_schema, with_constraints,
                 with_index, with_standard_vocab):
     """
@@ -67,6 +70,7 @@ def create_omop(refresh_all, from_schema, with_constraints,
 
 
 @click.command(name='drop-db')
+@time_it
 def drop_db():
     """
     Drop db regardless of the active connections
@@ -85,6 +89,7 @@ def drop_db():
               show_default=True,
               type=click.Path(file_okay=True, dir_okay=False),
               help='The location of the generated ERD file')
+@time_it
 def erd(output_filepath):
     """
     Generate an entity relationship diagram from the OMOP database
@@ -103,6 +108,7 @@ def erd(output_filepath):
               show_default=True,
               type=click.Path(file_okay=False, dir_okay=True),
               help='The directory where the py file will be generated')
+@time_it
 def generate_code_template(output_dir):
     """
     Generate a .py file with template code for connecting to the DB and
@@ -125,6 +131,7 @@ def generate_code_template(output_dir):
 
 
 @click.command('list-tables')
+@time_it
 def list_tables():
     """
     List tables in the database. Convenience method for sanity checks.
@@ -144,6 +151,7 @@ def list_tables():
               is_flag=True,
               help='A flag specifying whether to download and use the latest '
               'OMOP CommonDataModel postgres schema when creating the db.')
+@time_it
 def auto_gen_models(refresh_all):
     """
     Autogenerate the OMOP SQLAlchemy models
@@ -153,6 +161,7 @@ def auto_gen_models(refresh_all):
 
 
 @click.command('load-standard-vocab')
+@time_it
 def load_standard_vocab():
     """
     Load the standard vocabulary into OMOP db
@@ -162,6 +171,7 @@ def load_standard_vocab():
 
 
 @click.command('apply-constraints')
+@time_it
 def create_constraints():
     """
     Apply the constraints to the OMOP database. Constraints require that the
@@ -172,6 +182,7 @@ def create_constraints():
 
 
 @click.command('create-index')
+@time_it
 def create_index():
     """
     Create indices in OMOP database
