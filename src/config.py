@@ -7,6 +7,15 @@ CDM_STANDARD_VOCAB_DIR = os.path.join(
     os.path.dirname(os.path.dirname(ROOT_DIR)),
     'data', 'omop', 'standard_vocab')
 APP_CONFIG_ENV_VAR = 'OMOP_CONFIG'
+OMOP_VOCAB_TABLES = ['domain',
+                     'concept_class',
+                     'concept_ancestor',
+                     'drug_strength',
+                     'relationship',
+                     'vocabulary',
+                     'concept',
+                     'concept_relationship',
+                     'concept_synonym']
 
 
 class Config:

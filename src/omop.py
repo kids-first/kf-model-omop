@@ -8,7 +8,8 @@ from sqlalchemy import create_engine
 from config import (
     ROOT_DIR,
     CDM_REPO_URL,
-    CDM_STANDARD_VOCAB_DIR
+    CDM_STANDARD_VOCAB_DIR,
+    OMOP_VOCAB_TABLES
 )
 from model.models import Base
 from utils.db import create_db, drop_db, _select_config
@@ -136,11 +137,27 @@ def load_standard_vocab(config_name=None, engine=None, include_only=None):
     raw_conn = engine.raw_connection()
     cursor = raw_conn.cursor()
 
+    # Delete current data
+    delete_tables = '\n'.join([f'delete from {table_name};'
+                               for table_name in OMOP_VOCAB_TABLES]) + ';'
+    set_session_replication = 'set session_replication_role = {}; '
+
+    print(f'Deleting standard vocabulary ...\n{delete_tables}')
+
+    # Disable triggers and constraints
+    cursor.execute(set_session_replication.format('replica'))
+    raw_conn.commit()
+    # Delete tables
+    cursor.execute(delete_tables)
+    raw_conn.commit()
+
+    # Load standard vocabulary
     for fname in os.listdir(CDM_STANDARD_VOCAB_DIR):
         table_name = fname.split('.')[0].lower()
         if include_only and (table_name not in include_only):
             continue
-        copy_sql = f"COPY {table_name} FROM STDIN WITH DELIMITER E'\t' CSV HEADER QUOTE E'\b' ;"  # noqa E501
+        copy_sql = (f"COPY {table_name} FROM STDIN WITH DELIMITER E'\t' "
+                    "CSV HEADER QUOTE E'\b' ;")
 
         filepath = os.path.join(CDM_STANDARD_VOCAB_DIR, fname)
         file_obj = open(filepath, 'r')
@@ -148,6 +165,10 @@ def load_standard_vocab(config_name=None, engine=None, include_only=None):
         print(f'Loading standard vocabulary for {table_name}')
         cursor.copy_expert(copy_sql, file=file_obj)
         raw_conn.commit()
+
+    # Enable triggers and constraints
+    cursor.execute(set_session_replication.format('default'))
+    raw_conn.commit()
 
     cursor.close()
     raw_conn.close()
