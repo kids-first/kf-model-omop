@@ -15,14 +15,16 @@ from model.models import Base
 from utils.db import create_db, drop_db, _select_config
 
 CREATE_TABLES_SCRIPT = 'OMOP CDM postgresql ddl.txt'
-CREATE_INDEX_SCRIPT = 'OMOP CDM postgresql pk indexes.txt'
+CREATE_PK_INDEX_SCRIPT = 'OMOP CDM postgresql pk indexes.txt'
+CREATE_PK_SCRIPT = 'OMOP CDM postgresql pk.txt'
+CREATE_INDEX_SCRIPT = 'OMOP CDM postgresql indexes.txt'
 CREATE_CONSTRAINTS_SCRIPT = 'OMOP CDM postgresql constraints.txt'
 VOCAB_LOAD_SCRIPT = 'OMOP CDM vocabulary load - PostgreSQL.sql'
 SCRIPTS_DIR = os.path.join(os.path.dirname(ROOT_DIR), 'scripts')
 
 
 def create_omop(config_name=None, refresh=True, from_schema=False,
-                with_constraints=False, with_index=False,
+                with_pk=False, with_constraints=False, with_index=False,
                 with_standard_vocab=False):
     """
     Drop db, create new omop db, then create tables, indices, and constraints
@@ -60,14 +62,21 @@ def create_omop(config_name=None, refresh=True, from_schema=False,
         with engine.connect() as conn:
             # Tables
             create_tables(conn=conn)
+
+            # Primary keys
+            if with_pk:
+                create_pk(conn=conn)
+
             # Load standard vocab
             if with_standard_vocab:
                 load_standard_vocab(engine=engine)
+
             # Indices
             if with_index:
                 create_index(conn=conn)
+
             # Constraints
-            if with_constraints and with_index:
+            if with_constraints:
                 create_constraints(conn=conn)
 
 
@@ -123,6 +132,10 @@ def create_index(config_name=None, conn=None):
     exec_pg_script(CREATE_INDEX_SCRIPT, conn=conn)
 
 
+def create_pk(config_name=None, conn=None):
+    exec_pg_script(CREATE_PK_SCRIPT, conn=conn)
+
+
 def create_constraints(config_name=None, conn=None):
     exec_pg_script(CREATE_CONSTRAINTS_SCRIPT, conn=conn)
 
@@ -137,25 +150,25 @@ def load_standard_vocab(config_name=None, engine=None, include_only=None):
     raw_conn = engine.raw_connection()
     cursor = raw_conn.cursor()
 
+    # Disable triggers and constraints
+    set_session_replication = 'set session_replication_role = {}; '
+    cursor.execute(set_session_replication.format('replica'))
+
     # Delete current data
     delete_tables = '\n'.join([f'delete from {table_name};'
-                               for table_name in OMOP_VOCAB_TABLES]) + ';'
-    set_session_replication = 'set session_replication_role = {}; '
+                               for table_name in OMOP_VOCAB_TABLES])
 
     print(f'Deleting standard vocabulary ...\n{delete_tables}')
-
-    # Disable triggers and constraints
-    cursor.execute(set_session_replication.format('replica'))
-    raw_conn.commit()
-    # Delete tables
     cursor.execute(delete_tables)
-    raw_conn.commit()
 
     # Load standard vocabulary
     for fname in os.listdir(CDM_STANDARD_VOCAB_DIR):
         table_name = fname.split('.')[0].lower()
-        if include_only and (table_name not in include_only):
+        if table_name not in OMOP_VOCAB_TABLES:
             continue
+        if (include_only is not None) and (table_name not in include_only):
+            continue
+
         copy_sql = (f"COPY {table_name} FROM STDIN WITH DELIMITER E'\t' "
                     "CSV HEADER QUOTE E'\b' ;")
 
@@ -167,11 +180,12 @@ def load_standard_vocab(config_name=None, engine=None, include_only=None):
         raw_conn.commit()
 
     # Enable triggers and constraints
-    cursor.execute(set_session_replication.format('default'))
-    raw_conn.commit()
+    cursor.execute(set_session_replication.format('origin'))
 
     cursor.close()
     raw_conn.close()
+
+    print('\nStandard vocabulary loading complete!')
 
 
 def exec_pg_script(filename, config_name=None, conn=None):

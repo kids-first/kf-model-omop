@@ -31,18 +31,24 @@ def cli():
               is_flag=True,
               help='A flag specifying whether to create the OMOP tables from '
               'defined ORM models or from the OMOP Postgres scripts.')
+@click.option('--with_pk',
+              default=False,
+              show_default=True,
+              is_flag=True,
+              help='A flag specifying whether to add primary keys in OMOP db '
+              'after creating the tables')
 @click.option('--with_constraints',
               default=False,
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to apply constraints to OMOP db '
-              'after creating the db')
+              'after creating the tables')
 @click.option('--with_index',
               default=False,
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to add indices in OMOP db '
-              'after creating the db')
+              'after creating the tables')
 @click.option('--with_standard_vocab',
               default=False,
               show_default=True,
@@ -50,7 +56,7 @@ def cli():
               help='A flag specifying whether to populate the database '
               'with the OMOP standard vocabulary after its been created')
 @time_it
-def create_omop(refresh_all, from_schema, with_constraints,
+def create_omop(refresh_all, from_schema, with_pk, with_constraints,
                 with_index, with_standard_vocab):
     """
     Drop current db, create a new db with the OMOP tablesself.
@@ -64,6 +70,7 @@ def create_omop(refresh_all, from_schema, with_constraints,
 
     create_omop(refresh=refresh_all,
                 from_schema=from_schema,
+                with_pk=with_pk,
                 with_constraints=with_constraints,
                 with_index=with_index,
                 with_standard_vocab=with_standard_vocab)
@@ -170,7 +177,7 @@ def load_standard_vocab():
     load_standard_vocab()
 
 
-@click.command('apply-constraints')
+@click.command('create-constraints')
 @time_it
 def create_constraints():
     """
@@ -191,6 +198,16 @@ def create_index():
     create_index()
 
 
+@click.command('create-pk')
+@time_it
+def create_pk():
+    """
+    Create primary keys in OMOP database
+    """
+    from omop import create_pk
+    create_pk()
+
+
 cli.add_command(create_omop)
 cli.add_command(drop_db)
 cli.add_command(erd)
@@ -200,3 +217,4 @@ cli.add_command(auto_gen_models)
 cli.add_command(load_standard_vocab)
 cli.add_command(create_constraints)
 cli.add_command(create_index)
+cli.add_command(create_pk)
