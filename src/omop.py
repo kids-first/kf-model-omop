@@ -53,6 +53,11 @@ def create_omop(config_name=None, refresh=True, from_schema=False,
     # From models
     if not from_schema:
         Base.metadata.create_all(engine)
+
+        # Load standard vocab
+        if with_standard_vocab:
+            load_standard_vocab(engine=engine)
+
     # Directly from postgres scripts
     else:
         # Only run if required postgres scripts exist
@@ -67,6 +72,10 @@ def create_omop(config_name=None, refresh=True, from_schema=False,
             if with_pk:
                 create_pk(conn=conn)
 
+            # Constraints
+            if with_constraints:
+                create_constraints(conn=conn)
+
             # Load standard vocab
             if with_standard_vocab:
                 load_standard_vocab(engine=engine)
@@ -74,10 +83,6 @@ def create_omop(config_name=None, refresh=True, from_schema=False,
             # Indices
             if with_index:
                 create_index(conn=conn)
-
-            # Constraints
-            if with_constraints:
-                create_constraints(conn=conn)
 
 
 def refresh_pg_scripts(url=CDM_REPO_URL):

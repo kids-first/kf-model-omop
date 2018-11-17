@@ -57,7 +57,7 @@ def customize_models(model_filepath):
     with open(model_filepath, 'r') as models_file:
         models_txt = models_file.read()
         models_txt = models_txt.replace('ConceptClas', 'ConceptClass')
-        models_txt = models_txt.replace('(Base)', '(Base, ModelMixins)')
+        # models_txt = models_txt.replace('(Base)', '(Base, ModelMixins)')
 
     # Insert docstring and imports
     template_path = os.path.join(ROOT_DIR, 'factory', 'model_template.txt')

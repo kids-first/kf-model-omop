@@ -1,11 +1,7 @@
 """
 Auto generated models from postgres db schema using sqlacodegen
 https://pypi.org/project/sqlacodegen/
-
-Extend all models with model.common.ModelMixins
 """
-
-from model.common import ModelMixins
 
 
 {models}

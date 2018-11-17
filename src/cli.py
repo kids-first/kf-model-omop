@@ -36,19 +36,19 @@ def cli():
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to add primary keys in OMOP db '
-              'after creating the tables')
+              'after creating the tables. Only takes effect if --from_schema')
 @click.option('--with_constraints',
               default=False,
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to apply constraints to OMOP db '
-              'after creating the tables')
+              'after creating the tables. Only takes effect if --from_schema')
 @click.option('--with_index',
               default=False,
               show_default=True,
               is_flag=True,
               help='A flag specifying whether to add indices in OMOP db '
-              'after creating the tables')
+              'after creating the tables. Only takes effect if --from_schema')
 @click.option('--with_standard_vocab',
               default=False,
               show_default=True,
