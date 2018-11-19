@@ -19,8 +19,8 @@ kfmodel code-template
 
 Will generate something like this:
 ```python
-from model.models import *
-from factory import scoped_session
+from kf_model_omop.model.models import *
+from kf_model_omop.factory import scoped_session
 
 
 # Use the context managed session to interact with DB
@@ -34,7 +34,7 @@ with scoped_session() as session:
     assert session.query(Location).count() == 1
 ```
 
-- See `src/model/models.py` for more details on the ORM models.
+- See `kf_model_omop./model/models.py` for more details on the ORM models.
 
 - See https://docs.sqlalchemy.org/en/latest/orm/tutorial.html for more info
 on how to use the models to interact with the database.
