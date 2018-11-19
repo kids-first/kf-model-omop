@@ -10,11 +10,10 @@ setup(
     name='kf-model-omop',
     version='0.1',
     description='Kids First OMOP Model',
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
+    packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'kfmodel=cli:cli',
+            'kfmodel=kf_model_omop.cli:cli',
         ],
     },
     include_package_data=True,

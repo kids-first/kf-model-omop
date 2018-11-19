@@ -5,14 +5,14 @@ from shutil import copyfile, rmtree
 
 from sqlalchemy import create_engine
 
-from config import (
+from kf_model_omop.config import (
     ROOT_DIR,
     CDM_REPO_URL,
     CDM_STANDARD_VOCAB_DIR,
     OMOP_VOCAB_TABLES
 )
-from model.models import Base
-from utils.db import create_db, drop_db, _select_config
+from kf_model_omop.model.models import Base
+from kf_model_omop.utils.db import create_db, drop_db, _select_config
 
 CREATE_TABLES_SCRIPT = 'OMOP CDM postgresql ddl.txt'
 CREATE_PK_INDEX_SCRIPT = 'OMOP CDM postgresql pk indexes.txt'

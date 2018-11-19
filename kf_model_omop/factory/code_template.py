@@ -6,8 +6,8 @@ the kf-model-omop library. The scoped_session handles db session lifecycle
 management so that the caller simply has to worry about the loading code.
 """
 
-from model.models import *
-from factory import scoped_session
+from kf_model_omop.model.models import *
+from kf_model_omop.factory import scoped_session
 
 
 # Use the context managed session to interact with DB

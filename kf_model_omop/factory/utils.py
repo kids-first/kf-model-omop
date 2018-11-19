@@ -1,8 +1,8 @@
 import os
 import subprocess
 
-from utils.db import _select_config
-from config import MODELS_FILE_PATH, ROOT_DIR
+from kf_model_omop.utils.db import _select_config
+from kf_model_omop.config import MODELS_FILE_PATH, ROOT_DIR
 
 
 def auto_gen_models(config_name=None, refresh_schema=False,
