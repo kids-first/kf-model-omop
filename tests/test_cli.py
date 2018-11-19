@@ -1,8 +1,11 @@
 import os
+
+from sqlalchemy import inspect, create_engine
 from click.testing import CliRunner
 
-import cli
-from config import APP_CONFIG_ENV_VAR
+from kf_model_omop import cli
+from kf_model_omop.config import config as config_dict, APP_CONFIG_ENV_VAR
+from kf_model_omop.factory.utils import auto_gen_models
 
 env = {APP_CONFIG_ENV_VAR: 'testing'}
 
@@ -16,8 +19,6 @@ def test_create_omop():
 
     assert result.exit_code == 0
 
-    from sqlalchemy import inspect, create_engine
-    from config import config as config_dict
     config = config_dict.get('testing')
 
     engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
@@ -78,7 +79,6 @@ def test_auto_gen_models(tmpdir_factory):
     expected_file = str(fn)
 
     # Autogen models
-    from factory.utils import auto_gen_models
     auto_gen_models(config_name='testing', refresh_schema=True,
                     model_filepath=expected_file)
 

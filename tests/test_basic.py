@@ -1,6 +1,6 @@
 
-from factory import scoped_session
-from model.models import Location
+from kf_model_omop.factory import scoped_session
+from kf_model_omop.model.models import Location
 
 
 def test_model(db_session):

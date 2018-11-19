@@ -5,7 +5,7 @@ import sqlalchemy.types as types
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects.postgresql import UUID
 
-from model.id_service import kf_id_generator, uuid_generator
+from kf_model_omop.model.id_service import kf_id_generator, uuid_generator
 
 
 class KfId(types.TypeDecorator):

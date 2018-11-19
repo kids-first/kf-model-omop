@@ -5,7 +5,7 @@ from shutil import copyfile
 
 import click
 
-from utils.misc import time_it
+from kf_model_omop.utils.misc import time_it
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -66,7 +66,7 @@ def create_omop(refresh_all, from_schema, with_pk, with_constraints,
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from omop import create_omop
+    from kf_model_omop.omop import create_omop
 
     create_omop(refresh=refresh_all,
                 from_schema=from_schema,
@@ -85,7 +85,7 @@ def drop_db():
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from utils.db import drop_db
+    from kf_model_omop.utils.db import drop_db
 
     drop_db()
 
@@ -104,7 +104,7 @@ def erd(output_filepath):
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from utils.db import erd
+    from kf_model_omop.utils.db import erd
 
     erd(filepath=output_filepath)
 
@@ -146,7 +146,7 @@ def list_tables():
     All db parameters such as user, pw, host, port, and name of the db are
     controlled through environment variables. See config.py for more info.
     """
-    from utils.db import list_tables
+    from kf_model_omop.utils.db import list_tables
 
     pprint(list_tables())
 
@@ -163,7 +163,7 @@ def auto_gen_models(refresh_all):
     """
     Autogenerate the OMOP SQLAlchemy models
     """
-    from factory import utils
+    from kf_model_omop.factory import utils
     utils.auto_gen_models(refresh_schema=refresh_all)
 
 
@@ -173,7 +173,7 @@ def load_standard_vocab():
     """
     Load the standard vocabulary into OMOP db
     """
-    from omop import load_standard_vocab
+    from kf_model_omop.omop import load_standard_vocab
     load_standard_vocab()
 
 
@@ -184,7 +184,7 @@ def create_constraints():
     Apply the constraints to the OMOP database. Constraints require that the
     index has been created.
     """
-    from omop import create_constraints
+    from kf_model_omop.omop import create_constraints
     create_constraints()
 
 
@@ -194,7 +194,7 @@ def create_index():
     """
     Create indices in OMOP database
     """
-    from omop import create_index
+    from kf_model_omop.omop import create_index
     create_index()
 
 
@@ -204,7 +204,7 @@ def create_pk():
     """
     Create primary keys in OMOP database
     """
-    from omop import create_pk
+    from kf_model_omop.omop import create_pk
     create_pk()
 
 

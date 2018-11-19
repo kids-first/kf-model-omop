@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from config import config as config_dict
-from config import Config
+from kf_model_omop.config import config as config_dict
+from kf_model_omop.config import Config
 
 
 @contextmanager

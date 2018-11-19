@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import reflection
 from sqlalchemy.schema import (
     MetaData,
@@ -9,9 +9,10 @@ from sqlalchemy.schema import (
     ForeignKeyConstraint,
     DropConstraint,
 )
+from eralchemy import render_er
 
-from config import config as config_dict
-from config import (
+from kf_model_omop.config import config as config_dict
+from kf_model_omop.config import (
     ROOT_DIR,
     APP_CONFIG_ENV_VAR,
 )
@@ -97,7 +98,6 @@ def erd(config_name=None, filepath=None):
         filepath = os.path.join(doc_dir, 'erd.png')
 
     # Draw from database
-    from eralchemy import render_er
     print(f'Generating ERD for {config.PG_HOST}/{config.PG_NAME} ...')
     render_er(config.SQLALCHEMY_DATABASE_URI, filepath)
 
@@ -164,9 +164,6 @@ def list_tables(config_name=None):
     in config.config dict. The Config class encapsulates all db parameters such
     as user, pw, host, port, and name of the db. See config.py for more info.
     """
-    from utils.db import _select_config
-    from sqlalchemy import create_engine, inspect
-
     config = _select_config(config_name=None)
     engine = create_engine(config.SQLALCHEMY_DATABASE_URI)
 
