@@ -19,4 +19,3 @@ with scoped_session() as session:
     session.commit()
 
     assert session.query(Location).count() == 1
-    assert session.query(Location).first().kf_id

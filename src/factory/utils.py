@@ -1,30 +1,22 @@
 import os
 import subprocess
 
-from db import create_omop, drop_db
-from config import config as config_dict
+from utils.db import _select_config
 from config import MODELS_FILE_PATH, ROOT_DIR
 
 
-def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
+def auto_gen_models(config_name=None, refresh_schema=False,
+                    model_filepath=MODELS_FILE_PATH):
     """
     Autogenerate the OMOP SQLAlchemy models
 
-    Create a temp db, download latest OMOP boostrap postgres scripts, run
-    postgres scripts to create OMOP tables, constraints, etc.
-
-    Use sqlacodegen to generate models from temp db. Then apply customizations
+    Use sqlacodegen to generate models from the db. Then apply customizations
     to the models (i.e. add Kids First IDs, etc)
     """
     print('\nAuto-generating models ...\n')
-    # Create temp db with omop tables
-    create_omop(config_name='temp', refresh=refresh_schema, from_models=False)
 
     # Auto generate models from temp db
-    generate_models_from_db(model_filepath)
-
-    # Drop temp db
-    drop_db(config_name='temp')
+    generate_models_from_db(model_filepath, config_name)
 
     # Inject customizations into the models Python module
     customize_models(model_filepath)
@@ -32,11 +24,12 @@ def auto_gen_models(refresh_schema, model_filepath=MODELS_FILE_PATH):
     print(f'\nComplete - generated models: {model_filepath}')
 
 
-def generate_models_from_db(model_filepath, config_name='temp'):
+def generate_models_from_db(model_filepath, config_name=None):
     """
     Use sqlacodegen to generate SQLAlchemy models Python module from Postgres
     """
-    config = config_dict.get(config_name)
+
+    config = _select_config(config_name=config_name)
 
     cmd = (f'sqlacodegen {config.SQLALCHEMY_DATABASE_URI} '
            f'--outfile {model_filepath}')
@@ -64,7 +57,7 @@ def customize_models(model_filepath):
     with open(model_filepath, 'r') as models_file:
         models_txt = models_file.read()
         models_txt = models_txt.replace('ConceptClas', 'ConceptClass')
-        models_txt = models_txt.replace('(Base)', '(Base, ModelMixins)')
+        # models_txt = models_txt.replace('(Base)', '(Base, ModelMixins)')
 
     # Insert docstring and imports
     template_path = os.path.join(ROOT_DIR, 'factory', 'model_template.txt')
